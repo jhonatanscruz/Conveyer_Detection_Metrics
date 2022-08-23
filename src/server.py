@@ -244,7 +244,7 @@ if __name__ == "__main__":
     ############################################
     HOST    = credentials.udp_host
     PORT    = credentials.udp_port
-    address = credentials.udp_adress
+    address = credentials.udp_address
     buffer  = credentials.udp_buffer
     conn    = credentials.udp_conn
 
@@ -267,9 +267,6 @@ if __name__ == "__main__":
     stateVector = []
     currentState = 0
     states = ["extremely left-aligned", "slightly left-aligned", "center aligned", "slightly right-aligned", "extremely right-aligned"]
-
-    # ----------------- Wait for Ethernet connection ----------------- #
-    time.sleep(20) # wait 15 seconds before initialize
 
     #######################################################
     #                                                     #
@@ -301,7 +298,7 @@ if __name__ == "__main__":
             sock.bind(address)
             conn = True
         except:
-            time.sleep(1)
+            time.sleep(3)
             pass
 
     # --------------- Aguarda mensagens ---------------
@@ -315,6 +312,7 @@ if __name__ == "__main__":
     last_profile_count = setup[3]
     last_pulse_count = setup[4]
     last_time_received = setup[5]
+    last_distance = setup[6]
 
     if currentState == 0:
         msg = "ALERTA! ESTEIRA DESALINHADA: MUITO À ESQUERDA"
@@ -343,13 +341,16 @@ if __name__ == "__main__":
                 current_time = now()
                 conn = True
             except:
+                time.sleep(3)
                 pass
 
         area = getFloat(data[0],0)
-        dist = getFloat(data[0],28)
+        curr_r_align = getFloat(data[0],4)
+        curr_l_align = getFloat(data[0],12)
+        dist = fabs(curr_r_align - curr_l_align)
         if (dist >= 46) and (dist <= 54):
-            right_align = getFloat(data[0],4)
-            left_align = getFloat(data[0],12)
+            right_align = curr_r_align
+            left_align = curr_l_align
         pulse_count = getInt(data[0],24)
         client_address = data[1]
 
