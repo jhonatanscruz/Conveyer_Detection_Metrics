@@ -192,8 +192,10 @@ def calcVolume(last_area, current_area, last_pulse, current_pulse):
     mean_area = ((current_area + last_area)/2) * mm2_to_m2 # m²
     volume = (mean_area * delta_pulse * pulse_to_mm * mm_to_m) * volume_aprox # Volume in m³
 
-    if (volume > 0) return volume;
-    else return 0;
+    if (volume > 0):
+        return volume
+    else:
+        return 0
 
 def calcVelocity(delta_pulse, delta_time):
     pulse_to_mm = 0.05   # Converts each pulse to value in milimeters
@@ -204,8 +206,10 @@ def calcVelocity(delta_pulse, delta_time):
 
     velocity = (mean_pulse * pulse_to_mm * mm_to_m) / mean_time # m/s
 
-    if (velocity > 0) return velocity;
-    else return 0;
+    if (velocity > 0):
+        return velocity
+    else:
+        return 0
 
 """
 ##############################################
@@ -356,8 +360,10 @@ if __name__ == "__main__":
 
             # Accumulate values in vectors of pulse and time to calculate mean velocity
             delta_time_accumulated.append((current_time - last_time_received).total_seconds())
-            if(pulse_count - last_pulse_count > 0) pulse_accumulated.append(pulse_count - last_pulse_count);
-            else pulse_accumulated.append(pulse_count - 0);
+            if(pulse_count - last_pulse_count > 0):
+                pulse_accumulated.append(pulse_count - last_pulse_count)
+            else:
+                pulse_accumulated.append(pulse_count - 0)
 
             ##### REFRESH VALUES #####
             last_area_received = area
