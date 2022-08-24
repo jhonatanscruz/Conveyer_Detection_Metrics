@@ -4,10 +4,9 @@
 # Last Update: August 23th, 2022
 # By Jhonatan Cruz from Fttech Software Team
 
-import credentials, socket, threading, time, struct, serial, psycopg2
+import credentials, socket, threading, time, struct, serial, psycopg2, math
 from datetime import datetime, timezone
 from paho.mqtt import client as mqtt_client
-from math import fabs
 
 """
 #################################################################
@@ -347,8 +346,8 @@ if __name__ == "__main__":
         area = getFloat(data[0],0)
         curr_r_align = getFloat(data[0],4)
         curr_l_align = getFloat(data[0],12)
-        dist = fabs(curr_r_align - curr_l_align)
-        if (dist >= 47) and (dist <= 51):
+        dist = abs(curr_r_align - curr_l_align)
+        if((dist >= 47) and (dist <= 49)):
             right_align = curr_r_align
             left_align = curr_l_align
         pulse_count = getInt(data[0],24)
@@ -376,6 +375,7 @@ if __name__ == "__main__":
             if (diff.total_seconds() >= send_to_DB):
                 # Evaluates changes in conveyor position then sends alert to ALEXA SPEAKER
                 currentState = conveyorState(right_align, left_align, stateVector, currentState)
+                print(f"Dist_Atual: {abs(right_align - left_align)} | Dist_Calculated: {dist} | R: {right_align} | L: {left_align}\n")
 
                 # Velocity Calculation
                 velocity = calcVelocity(pulse_accumulated, delta_time_accumulated)
