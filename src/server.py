@@ -4,9 +4,10 @@
 # Last Update: August 23th, 2022
 # By Jhonatan Cruz from Fttech Software Team
 
-import credentials, socket, threading, time, struct, serial, psycopg2, math
+import credentials, socket, threading, time, struct, serial, psycopg2
 from datetime import datetime, timezone
 from paho.mqtt import client as mqtt_client
+from math import fabs
 
 """
 #################################################################
@@ -162,7 +163,7 @@ def conveyorState(r_align, l_align, stateVector, currentState):
 def now():
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
-def InitalSetup(sock, buffer):
+def InitialSetup(sock, buffer):
     data = []
     read = sock.recvfrom(buffer)
 
@@ -298,7 +299,7 @@ if __name__ == "__main__":
             sock.bind(address)
             conn = True
         except:
-            time.sleep(3)
+            time.sleep(1)
             pass
 
     # --------------- Aguarda mensagens ---------------
@@ -306,13 +307,12 @@ if __name__ == "__main__":
         print ('Aguardando mensagens...')
 
     # ------------- Initial Required Setup -------------
-    setup = InitalSetup(sock, buffer)
+    setup = InitialSetup(sock, buffer)
     last_area_received = setup[0]
     currentState = getState(setup[1], setup[2])
     last_profile_count = setup[3]
     last_pulse_count = setup[4]
     last_time_received = setup[5]
-    last_distance = setup[6]
 
     if currentState == 0:
         msg = "ALERTA! ESTEIRA DESALINHADA: MUITO À ESQUERDA"
@@ -341,14 +341,14 @@ if __name__ == "__main__":
                 current_time = now()
                 conn = True
             except:
-                time.sleep(3)
+                time.sleep(1)
                 pass
 
         area = getFloat(data[0],0)
         curr_r_align = getFloat(data[0],4)
         curr_l_align = getFloat(data[0],12)
         dist = fabs(curr_r_align - curr_l_align)
-        if (dist >= 46) and (dist <= 54):
+        if (dist >= 47) and (dist <= 51):
             right_align = curr_r_align
             left_align = curr_l_align
         pulse_count = getInt(data[0],24)
@@ -361,7 +361,7 @@ if __name__ == "__main__":
 
             # Accumulate values in vectors of pulse and time to calculate mean velocity
             delta_time_accumulated.append((current_time - last_time_received).total_seconds())
-            if(pulse_count - last_pulse_count > 0):
+            if(pulse_count - last_pulse_count) > 0:
                 pulse_accumulated.append(pulse_count - last_pulse_count)
             else:
                 pulse_accumulated.append(pulse_count - 0)
@@ -375,8 +375,7 @@ if __name__ == "__main__":
             diff = current_time - init
             if (diff.total_seconds() >= send_to_DB):
                 # Evaluates changes in conveyor position then sends alert to ALEXA SPEAKER
-                currState = conveyorState(right_align, left_align, stateVector, currentState)
-                currentState = currState
+                currentState = conveyorState(right_align, left_align, stateVector, currentState)
 
                 # Velocity Calculation
                 velocity = calcVelocity(pulse_accumulated, delta_time_accumulated)
